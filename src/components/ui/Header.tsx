@@ -25,7 +25,7 @@ export default async function Header() {
         <div className="hidden items-center gap-6 lg:flex">
           <Link
             href="/inquire"
-            className="relative z-50 rounded-lg border-2 border-warm-white/30 px-6 py-2.5 font-body text-[13px] font-semibold uppercase tracking-[0.15em] text-warm-white transition-all hover:border-terracotta hover:bg-terracotta hover:text-warm-white"
+            className="relative z-50 whitespace-nowrap rounded-lg bg-terracotta px-7 py-2.5 font-body text-[12px] font-semibold uppercase tracking-[0.15em] text-warm-white transition-all hover:bg-terracotta-light hover:shadow-lg"
           >
             Plan My Safari
           </Link>

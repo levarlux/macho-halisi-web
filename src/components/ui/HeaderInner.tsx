@@ -21,9 +21,9 @@ function resolveHref(item: NavigationItem): string {
   return `/${slug}`;
 }
 
-/* ── Desktop Mega-Menu Panel ─────────────────────────── */
+/* ── Desktop Transparent Dropdown ─────────────────────── */
 
-function MegaMenuPanel({
+function DropdownMenu({
   item,
   isOpen,
   onClose,
@@ -32,7 +32,6 @@ function MegaMenuPanel({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const handleEnter = () => {
@@ -40,7 +39,7 @@ function MegaMenuPanel({
   };
 
   const handleLeave = () => {
-    timeoutRef.current = setTimeout(onClose, 200);
+    timeoutRef.current = setTimeout(onClose, 150);
   };
 
   useEffect(() => {
@@ -49,23 +48,18 @@ function MegaMenuPanel({
     };
   }, []);
 
-  if (!isOpen) return null;
+  if (!isOpen || !item.children?.length) return null;
 
   // Group children into columns
   const columns: { title: string; links: NavigationItem[] }[] = [];
   let currentColumn: { title: string; links: NavigationItem[] } | null = null;
 
-  item.children?.forEach((child) => {
+  item.children.forEach((child) => {
     if (child.children) {
       if (currentColumn) columns.push(currentColumn);
-      currentColumn = {
-        title: child.label,
-        links: child.children,
-      };
+      currentColumn = { title: child.label, links: child.children };
     } else {
-      if (!currentColumn) {
-        currentColumn = { title: "", links: [] };
-      }
+      if (!currentColumn) currentColumn = { title: "", links: [] };
       currentColumn.links.push(child);
     }
   });
@@ -73,65 +67,39 @@ function MegaMenuPanel({
 
   return (
     <div
-      ref={ref}
-      className="absolute left-0 top-full z-50"
+      className="absolute left-0 top-full z-50 pt-2"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
     >
-      {/* Full-width panel */}
-      <div className="border-t border-terracotta/40 bg-warm-white shadow-2xl">
-        <div className="mx-auto max-w-7xl px-8 py-10">
-          {/* Category header */}
-          <div className="mb-8 flex items-center gap-3">
-            <span className="font-display text-2xl font-semibold text-charcoal">
-              {item.label}
-            </span>
-            <div className="h-px flex-1 bg-cream-dark" />
-          </div>
-
-          {/* Editorial columns */}
-          <div className="grid gap-10" style={{ gridTemplateColumns: `repeat(${Math.max(columns.length, 3)}, 1fr)` }}>
-            {columns.map((col) => (
-              <div key={col.title || "main"}>
-                {col.title && (
-                  <h4 className="mb-4 font-body text-[11px] font-semibold uppercase tracking-[0.2em] text-charcoal-light">
-                    {col.title}
-                  </h4>
-                )}
-                <ul className="space-y-1">
-                  {col.links.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={resolveHref(link)}
-                        onClick={onClose}
-                        className="group flex items-center gap-3 rounded-md px-3 py-2.5 font-body text-sm text-charcoal transition-all hover:bg-cream hover:text-terracotta"
-                      >
-                        <span className="h-1 w-1 rounded-full bg-terracotta/0 transition-all group-hover:bg-terracotta group-hover:scale-125" />
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom accent */}
-          <div className="mt-8 flex items-center gap-4 border-t border-cream-dark pt-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-terracotta/10">
-              <svg className="h-5 w-5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
+      {/* Transparent dropdown — no background, no shadow, no border */}
+      <div className="min-w-[200px] py-2">
+        <div
+          className="flex gap-10"
+          style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
+        >
+          {columns.map((col) => (
+            <div key={col.title || "main"}>
+              {col.title && (
+                <p className="mb-3 font-body text-[10px] font-semibold uppercase tracking-[0.2em] text-terracotta-light">
+                  {col.title}
+                </p>
+              )}
+              <ul className="space-y-0.5">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={resolveHref(link)}
+                      onClick={onClose}
+                      className="group flex items-center gap-2 rounded px-3 py-2 font-body text-[13px] text-warm-white/60 transition-all duration-200 hover:translate-x-1 hover:text-terracotta-light"
+                    >
+                      <span className="h-px w-0 bg-terracotta-light transition-all duration-200 group-hover:w-3" />
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div>
-              <p className="font-body text-xs font-medium uppercase tracking-wider text-charcoal-light">
-                Ready to plan?
-              </p>
-              <p className="font-body text-sm text-charcoal">
-                Speak with a safari expert — +255 754 474 792
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
@@ -149,7 +117,6 @@ export default function HeaderInner({ items }: Props) {
   const handleScroll = useCallback(() => {
     const isScrolled = window.scrollY > 80;
     setScrolled(isScrolled);
-    // Update header element for transparent→solid transition
     const header = document.querySelector("header");
     if (header) {
       header.setAttribute("data-scrolled", String(isScrolled));
@@ -162,7 +129,6 @@ export default function HeaderInner({ items }: Props) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
@@ -174,55 +140,63 @@ export default function HeaderInner({ items }: Props) {
     };
   }, [mobileOpen]);
 
+  const isContact = (label: string) =>
+    label.toLowerCase().includes("contact");
+
   return (
     <>
       {/* ── Desktop Nav ── */}
       <nav className="hidden items-center gap-1 lg:flex">
         {items.map((item) => {
-          if (item.link) {
+          // Items with children → hover dropdown
+          if (item.children && item.children.length > 0) {
+            return (
+              <div
+                key={item.label}
+                className="relative"
+                onMouseEnter={() => setOpenDropdown(item.label)}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                <button
+                  className="group relative px-4 py-2 font-body text-[13px] font-medium uppercase tracking-[0.18em] text-warm-white transition-colors hover:text-terracotta-light"
+                  aria-expanded={openDropdown === item.label}
+                >
+                  {item.label}
+                  <span className="absolute bottom-0 left-4 right-4 h-px scale-x-0 bg-terracotta-light transition-transform duration-300 group-hover:scale-x-100" />
+                </button>
+
+                <DropdownMenu
+                  item={item}
+                  isOpen={openDropdown === item.label}
+                  onClose={() => setOpenDropdown(null)}
+                />
+              </div>
+            );
+          }
+
+          // "Contacts" → outlined button
+          if (isContact(item.label)) {
             return (
               <Link
                 key={item.label}
                 href={resolveHref(item)}
-                className="group relative px-4 py-2 font-body text-[13px] font-medium uppercase tracking-[0.18em] text-warm-white/80 transition-colors hover:text-warm-white"
+                className="ml-2 rounded-lg border border-warm-white/40 px-5 py-2 font-body text-[12px] font-semibold uppercase tracking-[0.15em] text-warm-white transition-all hover:border-terracotta-light hover:bg-terracotta-light/10"
               >
                 {item.label}
-                <span className="absolute bottom-0 left-4 right-4 h-px scale-x-0 bg-terracotta transition-transform duration-300 group-hover:scale-x-100" />
               </Link>
             );
           }
 
+          // Simple links → no opacity reduction
           return (
-            <div
+            <Link
               key={item.label}
-              className="relative"
-              onMouseEnter={() => setOpenDropdown(item.label)}
-              onMouseLeave={() => setOpenDropdown(null)}
+              href={resolveHref(item)}
+              className="group relative px-4 py-2 font-body text-[13px] font-medium uppercase tracking-[0.18em] text-warm-white transition-colors hover:text-terracotta-light"
             >
-              <button
-                className="group relative flex items-center gap-1.5 px-4 py-2 font-body text-[13px] font-medium uppercase tracking-[0.18em] text-warm-white/80 transition-colors hover:text-warm-white"
-                aria-expanded={openDropdown === item.label}
-              >
-                {item.label}
-                <svg
-                  className={`h-3 w-3 transition-transform duration-300 ${
-                    openDropdown === item.label ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-                <span className="absolute bottom-0 left-4 right-4 h-px scale-x-0 bg-terracotta transition-transform duration-300 group-hover:scale-x-100" />
-              </button>
-
-              <MegaMenuPanel
-                item={item}
-                isOpen={openDropdown === item.label}
-                onClose={() => setOpenDropdown(null)}
-              />
-            </div>
+              {item.label}
+              <span className="absolute bottom-0 left-4 right-4 h-px scale-x-0 bg-terracotta-light transition-transform duration-300 group-hover:scale-x-100" />
+            </Link>
           );
         })}
       </nav>
